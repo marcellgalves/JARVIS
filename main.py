@@ -1,5 +1,6 @@
 from core import JarvisCore
 
+
 jarvis = JarvisCore()
 print("JARVIS iniciado. ")
 

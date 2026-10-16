@@ -1,3 +1,8 @@
+
+import logging
+logger = logging.getLogger(__name__)
+
+
 class JarvisCore:
     def __init__(self):
         self.nome = "JARVIS"
@@ -5,7 +10,8 @@ class JarvisCore:
             '/help': self.help,
             '/version': self.version,
             '/apresentar': self.apresentar,
-            '/somar': self.somar
+            '/somar': self.somar,
+            '/repetir': self.repetir,
         }
     
     def process_message(self, message: str) -> str:
@@ -14,19 +20,12 @@ class JarvisCore:
             return ""
         command = elementos_mensagem[0]
         if command in self.commands_dict:
-            if command == "/somar":
-                
-                if len(elementos_mensagem) != 3:
-                    return "Erro: quantidade incorreta de argumentos"
-                try:
-                    return f'Resultado: {self.somar(int(elementos_mensagem[1]),int(elementos_mensagem[2]))}'
-                except ValueError:
-                    return "Erro, digite os parametros corretos. "
-            else:
-                return self.commands_dict[command]()
-            
-        else:
-            return f"JARVIS: Recebi sua mensagem: {message}" 
+            resto_command = elementos_mensagem[1:]
+            logger.info(f"Comando {command} recebido.")
+            return self.commands_dict[command](resto_command)
+        elif command.startswith("/"):
+            logger.error("Comando não reconhecido.")
+        return f"JARVIS: Recebi sua mensagem: {message}" 
         
 
 
@@ -37,20 +36,30 @@ class JarvisCore:
 
 
 
-    def help(self) -> str:
+    def help(self, args: list[str]) -> str:
         return "\n /help -> exibe todos os comandos de JARVIS disponiveis. " \
         " \n /version -> exibe a versao do programa. " \
         "\n /apresentar -> apresenta JARVIS ao usuário. " \
         "\n /somar (int a, int b) -> soma dois números e devolve o resultado. " \
+        "\n /repetir (str mensagem) -> repete a mensagem digitada pelo usuário. " \
         "\n /exit -> Encerra JARVIS. "
-    def version(self) -> str:
+    def version(self, args: list[str]) -> str:
         return "JARVIS 0.1.1"
-    def apresentar(self) -> str:
+    def apresentar(self, args: list[str]) -> str:
         return f"Olá, meu nome é {self.nome}, o seu assistente pessoal!"
-    def somar(self, a: int, b: int) -> int:
-        return a + b
-  
-
+    def somar(self, args: list[str]) -> str:
+        if len(args) != 2:
+            logger.error("Quantidade incorreta de parametros na função /somar.")
+            return "Erro: Quantidade incorreta de parametros. "
+        try:
+            resultado = int(args[0]) + int(args[1])
+            return f'Resultado: {resultado}'
+        except ValueError:
+            logger.error("Formato de parametro(s) incorreto")
+            return "Erro: digite parametros corretos. "
+    def repetir(self, args: list[str]) -> str:
+        frase = " ".join(args)
+        return f"JARVIS: {frase}"
 
 
 
