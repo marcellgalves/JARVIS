@@ -1,10 +1,11 @@
-
+from ollama_client import OllamaClient
 import logging
 logger = logging.getLogger(__name__)
 
 
 class JarvisCore:
     def __init__(self):
+        self.client = OllamaClient()
         self.nome = "JARVIS"
         self.commands_dict = {
             '/help': self.help,
@@ -24,8 +25,8 @@ class JarvisCore:
             logger.info(f"Comando {command} recebido.")
             return self.commands_dict[command](resto_command)
         elif command.startswith("/"):
-            logger.error("Comando não reconhecido.")
-        return f"JARVIS: Recebi sua mensagem: {message}" 
+            return "JARVIS: Comando não reconhecido."
+        return self.client.chat(message) 
         
 
 
