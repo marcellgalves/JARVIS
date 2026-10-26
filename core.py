@@ -13,6 +13,7 @@ class JarvisCore:
             '/apresentar': self.apresentar,
             '/somar': self.somar,
             '/repetir': self.repetir,
+            '/memoria': self.memoria,
         }
     
     def process_message(self, message: str) -> str:
@@ -43,7 +44,8 @@ class JarvisCore:
         "\n /apresentar -> apresenta JARVIS ao usuário. " \
         "\n /somar (int a, int b) -> soma dois números e devolve o resultado. " \
         "\n /repetir (str mensagem) -> repete a mensagem digitada pelo usuário. " \
-        "\n /exit -> Encerra JARVIS. "
+        "\n /exit -> Encerra JARVIS. " \
+        "\n /memoria -> exibe a memória do chat de User - JARVIS"
     def version(self, args: list[str]) -> str:
         return "JARVIS 0.1.1"
     def apresentar(self, args: list[str]) -> str:
@@ -61,10 +63,12 @@ class JarvisCore:
     def repetir(self, args: list[str]) -> str:
         frase = " ".join(args)
         return f"JARVIS: {frase}"
-
-
-
-   
+    def memoria(self, args: list[str]):
+        historico = self.client.dados["messages"]
+        linhas = []
+        for mensagem in historico:
+            linhas.append(f'{mensagem["role"]}: {mensagem["content"]}')
+        return "\n ".join(linhas)
 
 
 
