@@ -4,13 +4,35 @@ import logging
 logger = logging.getLogger(__name__)
 
 class OllamaClient:
+    
     def __init__(self):
         self.url = "http://localhost:11434/api/chat"
+        self.ferramenta_somar = {
+                        "type": "function",
+                        "function": {
+                        "name": "somar",
+                        "description": "Soma dois números inteiros.",
+                        "parameters": {
+                        "type": "object",
+                        "properties": {
+                        "a": {"type": "integer"},
+                        "b": {"type": "integer"}
+                        },
+                        "required": ["a", "b"]
+                        }
+                        
+                        },
+                        
+                    }
         self.dados = {
                 "model": "qwen3:4b",
                 "stream": False,
-                "messages":[]
+                "messages":[],
+                "tools":[]
         }
+
+        
+        self.dados["tools"].append(self.ferramenta_somar)
 
     
     def chat(self, message:str) -> str:
@@ -23,6 +45,7 @@ class OllamaClient:
             resposta = requests.post(self.url, json=self.dados, timeout=60)
             resposta.raise_for_status()
             dados_resposta = resposta.json()
+            print(dados_resposta["message"])
             self.dados["messages"].append(dados_resposta["message"])
             
             return dados_resposta["message"]["content"]
@@ -35,3 +58,4 @@ class OllamaClient:
         except requests.exceptions.HTTPError:
             logger.error("Erro HTTP na comunicação com o Ollama.")
             return "Erro HTTP na comunicação com o Ollama."
+

@@ -15,6 +15,9 @@ class JarvisCore:
             '/repetir': self.repetir,
             '/memoria': self.memoria,
         }
+        self.tools_dict = {
+           "somar": self.somar
+        }
     
     def process_message(self, message: str) -> str:
         elementos_mensagem = message.split()   
@@ -30,8 +33,18 @@ class JarvisCore:
         return self.client.chat(message) 
         
 
-
-
+    def executar_ferramenta(self, nome: str, argumentos: dict) -> str:
+        if nome in self.tools_dict:
+            try:
+                argumentos_lista = [
+                    str(argumentos["a"]),
+                    str(argumentos["b"])
+                ]
+            except KeyError:
+                return "Erro: argumento obrigatório ausente."
+            return self.tools_dict[nome](argumentos_lista)
+        else:
+            return "Função inexistente/indisponível para JARVIS."
 
 
 
@@ -40,14 +53,14 @@ class JarvisCore:
 
     def help(self, args: list[str]) -> str:
         return "\n /help -> exibe todos os comandos de JARVIS disponiveis. " \
-        " \n /version -> exibe a versao do programa. " \
+        "   \n /version -> exibe a versao do programa. " \
         "\n /apresentar -> apresenta JARVIS ao usuário. " \
         "\n /somar (int a, int b) -> soma dois números e devolve o resultado. " \
         "\n /repetir (str mensagem) -> repete a mensagem digitada pelo usuário. " \
         "\n /exit -> Encerra JARVIS. " \
         "\n /memoria -> exibe a memória do chat de User - JARVIS"
     def version(self, args: list[str]) -> str:
-        return "JARVIS 0.1.1"
+        return "JARVIS 0.1.2"
     def apresentar(self, args: list[str]) -> str:
         return f"Olá, meu nome é {self.nome}, o seu assistente pessoal!"
     def somar(self, args: list[str]) -> str:
