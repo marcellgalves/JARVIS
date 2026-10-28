@@ -35,7 +35,7 @@ class OllamaClient:
         self.dados["tools"].append(self.ferramenta_somar)
 
     
-    def chat(self, message:str) -> str:
+    def chat(self, message:str) -> dict:
         nova_mensagem = {
             "role": "user",
             "content": message
@@ -44,18 +44,42 @@ class OllamaClient:
         try:
             resposta = requests.post(self.url, json=self.dados, timeout=60)
             resposta.raise_for_status()
+
             dados_resposta = resposta.json()
-            print(dados_resposta["message"])
-            self.dados["messages"].append(dados_resposta["message"])
-            
-            return dados_resposta["message"]["content"]
+
+
+            mensagem_ia = dados_resposta["message"]
+            if mensagem_ia.get("tool_calls"):
+                nome_ferramenta = mensagem_ia["tool_calls"][0]["function"]["name"]
+                argumentos = mensagem_ia["tool_calls"][0]["function"]["arguments"]
+
+                return {
+                    "tipo": "ferramenta",
+                    "nome": nome_ferramenta,
+                    "argumentos": argumentos
+                }
+            else:
+                self.dados["messages"].append(mensagem_ia)
+                return {
+                    "tipo": "texto",
+                    "conteudo": mensagem_ia["content"]
+                }
         except requests.exceptions.ConnectionError:
             logger.error("Não foi possível conectar ao Ollama.")
-            return "JARVIS: Não foi possível conectar ao Ollama."
+            return {
+                   "tipo": "texto",
+                   "conteudo": "Não foi possível conectar ao Ollama."
+                    }
         except requests.exceptions.Timeout:
             logger.error("Ollama server demorou demais para responder.")
-            return "Ollama server demorou demais para responder."
+            return {
+                   "tipo": "texto",
+                   "conteudo": "Ollama server demorou demais para responder."
+                    }
         except requests.exceptions.HTTPError:
             logger.error("Erro HTTP na comunicação com o Ollama.")
-            return "Erro HTTP na comunicação com o Ollama."
+            return {
+                   "tipo": "texto",
+                   "conteudo": "Erro HTTP na comunicação com o Ollama."
+                    }
 
